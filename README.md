@@ -19,6 +19,21 @@ The system uses efficient data structures for optimal performance:
 - **Hash Map**: Provides O(1) lookup for order cancellation
 - **Lazy Deletion**: Canceled orders are marked inactive and cleaned during matching
 
+### Time Complexity Analysis
+
+- **Order Insertion:** `O(log n)` — Inserting an order into the max-heap (bids) or min-heap (asks) takes logarithmic time.
+- **Order Cancellation:** `O(1)` amortized — Handled by a fast hash map lookup that marks the order as inactive (lazy deletion).
+- **Order Matching:** `O(log n)` amortized — Derived from pulling the top order from the heap and cleaning up lazily deleted orders during the matching process.
+- **Order Lookup:** `O(1)` — Executed instantly via the hash map.
+
+### Design Decisions
+
+1. **Why Max-Heap for Bids & Min-Heap for Asks?** We always need to match the highest willing buyer with the lowest willing seller. A max-heap naturally keeps the highest bid price at the root, and a min-heap keeps the lowest ask price at the root, making the matching check an instant `O(1)` operation.
+
+2. **Why a Hash Map for Cancellation?** Standard priority queues do not support efficient searching. If a user cancels an order, scanning the heap to find it would take `O(n)` time. By mapping order IDs to their memory locations via a hash map, we can locate and flag any order instantly in `O(1)` time.
+
+3. **Why Lazy Deletion?** Removing an element from the middle of a heap is an expensive `O(n)` operation. Instead of removing canceled orders immediately, we mark them as `inactive` via the hash map. When the matching engine encounters an inactive order at the top of the heap later, it simply pops and discards it. This keeps the cancellation action strictly `O(1)`.
+
 ## Building
 
 ### Prerequisites
@@ -30,111 +45,3 @@ The system uses efficient data structures for optimal performance:
 
 ```bash
 make
-```
-
-This will create an executable named `orderbook`.
-
-### Running
-
-```bash
-make run
-```
-
-Or directly:
-
-```bash
-./orderbook
-```
-
-### Clean Build Artifacts
-
-```bash
-make clean
-```
-
-## Usage
-
-### Commands
-
-- `BUY <quantity> <price>` - Add a buy order
-- `SELL <quantity> <price>` - Add a sell order
-- `CANCEL <order_id>` - Cancel an existing order
-- `BOOK` - Display the current order book
-- `TRADES` - Display all executed trades
-- `HELP` - Show available commands
-- `EXIT` - Exit the program
-
-### Example Session
-
-```
-> BUY 1000 50.00
-Order 1: BUY 1000 @ 50.00
-
-> SELL 500 49.50
-Order 2: SELL 500 @ 49.50
-Trade 1: 500 @ 50.00 (Buy: 1, Sell: 2)
-
-> BOOK
-=== ORDER BOOK ===
-BIDS           ASKS           
-Qty | Price    Price | Qty    
---------------------------------
-500 | 50.00                    
-
-> TRADES
-=== TRADE HISTORY ===
-Trade 1: 500 @ 50.00 (Buy: 1, Sell: 2)
-```
-
-## Project Structure
-
-```
-.
-├── Order.h          # Order class definition
-├── Order.cpp        # Order implementation
-├── Trade.h          # Trade class definition
-├── Trade.cpp        # Trade implementation
-├── OrderBook.h      # OrderBook class and comparators
-├── OrderBook.cpp    # OrderBook implementation
-├── main.cpp         # Application entry point
-├── Makefile         # Build configuration
-└── README.md        # This file
-```
-
-## Key Components
-
-### Order
-Represents a single buy or sell order with:
-- Unique order ID (atomic counter)
-- Order type (BUY/SELL)
-- Price and quantity
-- Timestamp for time-priority
-- Active status flag
-
-### Trade
-Represents an executed trade with:
-- Unique trade ID
-- Buy and sell order IDs
-- Execution price and quantity
-- Timestamp
-
-### OrderBook
-Main matching engine that:
-- Manages order heaps and lookup map
-- Executes trades when orders match
-- Handles lazy deletion for cancellations
-- Maintains trade history
-
-## Matching Logic
-
-1. When a new order is added, the matching engine checks if it can match
-2. Matching occurs when: `highest_bid_price >= lowest_ask_price`
-3. Trade price uses the price of the order that was in the book first (older timestamp)
-4. Orders are matched in full or partially based on available quantities
-5. Fully filled orders are removed from the book
-6. Canceled orders are cleaned from heaps during matching (lazy deletion)
-
-## License
-
-This project is open source and available for educational purposes.
-
