@@ -11,6 +11,7 @@
 
 static constexpr double PRICE_EPSILON = 1e-9;
 
+// Internal alias — not part of public API
 using OrderPtr = std::shared_ptr<Order>;
 
 struct CompareBids {
