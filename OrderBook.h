@@ -38,14 +38,18 @@ private:
     std::priority_queue<OrderPtr, std::vector<OrderPtr>, CompareAsks> asks;
     std::unordered_map<int, OrderPtr> order_map;
     std::vector<Trade> trade_history;
-    
+
     void match_orders();
-    
+
 public:
     int add_order(OrderType type, double price, int quantity);
     void cancel_order(int order_id);
     void print_book() const;
     void print_trades() const;
+
+    // Testing accessors
+    size_t trade_count() const;
+    const std::vector<Trade>& get_trade_history() const;
 };
 
 #endif // ORDERBOOK_H
