@@ -171,3 +171,27 @@ TEST(OrderBookTest, MarketOrderWithoutLiquidity)
 
     EXPECT_TRUE(book.get_trade_history().empty());
 }
+
+TEST(OrderBookTest, IOCLeavesNoResidual)
+{
+    OrderBook book;
+
+    book.add_order(OrderType::SELL, 100.0, 10);
+
+    book.add_order(
+        OrderType::BUY,
+        100.0,
+        20,
+        OrderExecutionType::IOC
+    );
+
+    EXPECT_EQ(book.trade_count(), 1UL);
+
+    const auto& trades = book.get_trade_history();
+
+    ASSERT_EQ(trades.size(), 1UL);
+
+    EXPECT_EQ(trades[0].quantity, 10);
+
+    EXPECT_EQ(book.active_order_count(), 0UL);
+}

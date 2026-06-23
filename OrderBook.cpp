@@ -118,6 +118,18 @@ int OrderBook::add_order(
     
     match_orders();
     
+    if (execution_type == OrderExecutionType::IOC &&
+
+    new_order->remaining_quantity > 0)
+
+ {
+
+    new_order->is_active = false;
+
+    order_map.erase(new_order->order_id);
+
+ }
+
     return new_order->order_id;
 }
 
@@ -201,4 +213,8 @@ size_t OrderBook::trade_count() const {
 
 const std::vector<Trade>& OrderBook::get_trade_history() const {
     return trade_history;
+}
+
+size_t OrderBook::active_order_count() const {
+    return order_map.size();
 }

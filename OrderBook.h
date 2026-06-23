@@ -54,6 +54,7 @@ public:
     // Testing accessors
     size_t trade_count() const;
     const std::vector<Trade>& get_trade_history() const;
+    size_t active_order_count() const;
 };
 
 #endif // ORDERBOOK_H
