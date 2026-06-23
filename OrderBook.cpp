@@ -96,6 +96,10 @@ int OrderBook::add_order(
     int quantity,
     OrderExecutionType execution_type
  ) {
+    if (execution_type == OrderExecutionType::FOK && !can_fully_fill(type, price, quantity)){
+        std::cout << "FOK order rejected: insufficient liquidity." << std::endl;
+        return -1;
+    }
     OrderPtr new_order = std::make_shared<Order>(
         type,
         price,
@@ -207,6 +211,56 @@ void OrderBook::print_trades() const {
     }
     std::cout << std::endl;
 }
+bool OrderBook::can_fully_fill(
+    OrderType type,
+    double price,
+    int quantity
+) const
+{
+    int available = 0;
+
+    if (type == OrderType::BUY) {
+        auto asks_copy = asks;
+
+        while (!asks_copy.empty()) {
+            auto order = asks_copy.top();
+            asks_copy.pop();
+
+            if (!order->is_active)
+                continue;
+
+            if (order->price > price)
+                break;
+
+            available += order->remaining_quantity;
+
+            if (available >= quantity)
+                return true;
+        }
+    }
+    else {
+        auto bids_copy = bids;
+
+        while (!bids_copy.empty()) {
+            auto order = bids_copy.top();
+            bids_copy.pop();
+
+            if (!order->is_active)
+                continue;
+
+            if (order->price < price)
+                break;
+
+            available += order->remaining_quantity;
+
+            if (available >= quantity)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 size_t OrderBook::trade_count() const {
     return trade_history.size();
 }

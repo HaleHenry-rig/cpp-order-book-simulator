@@ -195,3 +195,28 @@ TEST(OrderBookTest, IOCLeavesNoResidual)
 
     EXPECT_EQ(book.active_order_count(), 0UL);
 }
+
+TEST(OrderBookTest, FOKFailsWithoutFullLiquidity)
+{
+    OrderBook book;
+
+    book.add_order(
+        OrderType::SELL,
+        100.0,
+        10
+    );
+
+    book.add_order(
+        OrderType::BUY,
+        100.0,
+        20,
+        OrderExecutionType::FOK
+    );
+
+    EXPECT_EQ(book.trade_count(), 0UL);
+
+    EXPECT_EQ(
+        book.active_order_count(),
+        1UL
+    );
+}

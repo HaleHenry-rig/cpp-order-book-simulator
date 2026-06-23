@@ -40,6 +40,15 @@ private:
     std::vector<Trade> trade_history;
 
     void match_orders();
+    bool can_fully_fill(
+
+    OrderType type,
+
+    double price,
+
+    int quantity
+
+ ) const;
 
 public:
     int add_order(

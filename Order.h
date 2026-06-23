@@ -13,7 +13,8 @@ enum class OrderType {
 enum class OrderExecutionType {
     LIMIT,
     MARKET,
-    IOC
+    IOC,
+    FOK
 };
 
 class Order {
