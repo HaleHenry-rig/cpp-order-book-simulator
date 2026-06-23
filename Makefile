@@ -1,10 +1,10 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -g
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -g -I/opt/homebrew/opt/googletest/include
 
 TARGET = orderbook
 OBJS = Order.o Trade.o OrderBook.o main.o
 
-TEST_TARGET = tests
+TEST_TARGET = orderbook_tests
 TEST_OBJS = Order.o Trade.o OrderBook.o tests/OrderBookTest.o
 
 all: $(TARGET)
@@ -14,6 +14,7 @@ $(TARGET): $(OBJS)
 
 $(TEST_TARGET): $(TEST_OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS) \
+	-L/opt/homebrew/opt/googletest/lib \
 	-lgtest -lgtest_main -pthread
 
 %.o: %.cpp
