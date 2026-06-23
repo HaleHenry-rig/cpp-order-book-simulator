@@ -7,47 +7,81 @@
 #include <cstdint>
 
 void OrderBook::match_orders() {
-    while (!bids.empty() && !asks.empty() && bids.top()->price >= asks.top()->price) {
+    while (!bids.empty() && !asks.empty()) {
+
         OrderPtr best_bid = bids.top();
         OrderPtr best_ask = asks.top();
-        
+
         // Heap Cleaning (Lazy Deletion Handling)
         if (!best_bid->is_active) {
             bids.pop();
             continue;
         }
-        
+
         if (!best_ask->is_active) {
             asks.pop();
             continue;
         }
-        
+
+        bool can_match = false;
+
+        if (best_bid->execution_type == OrderExecutionType::MARKET ||
+            best_ask->execution_type == OrderExecutionType::MARKET) {
+            can_match = true;
+        }
+        else if (best_bid->price >= best_ask->price) {
+            can_match = true;
+        }
+
+        if (!can_match) {
+            break;
+        }
+
         // Trade Execution
-        int trade_quantity = std::min(best_bid->remaining_quantity, best_ask->remaining_quantity);
-        
-        // Determine trade price: use the price of the order with older timestamp
-        double trade_price = (best_bid->timestamp < best_ask->timestamp) 
-                             ? best_bid->price 
-                             : best_ask->price;
-        
-        int64_t trade_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        
-        Trade trade(best_bid->order_id, best_ask->order_id, trade_price, trade_quantity, trade_timestamp);
+        int trade_quantity =
+            std::min(best_bid->remaining_quantity,
+                     best_ask->remaining_quantity);
+
+        double trade_price;
+
+        if (best_bid->execution_type == OrderExecutionType::MARKET) {
+            trade_price = best_ask->price;
+        }
+        else if (best_ask->execution_type == OrderExecutionType::MARKET) {
+            trade_price = best_bid->price;
+        }
+        else {
+            trade_price =
+                (best_bid->timestamp < best_ask->timestamp)
+                    ? best_bid->price
+                    : best_ask->price;
+        }
+
+        int64_t trade_timestamp =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::system_clock::now().time_since_epoch())
+                .count();
+
+        Trade trade(
+            best_bid->order_id,
+            best_ask->order_id,
+            trade_price,
+            trade_quantity,
+            trade_timestamp
+        );
+
         trade_history.push_back(trade);
         trade.print();
-        
-        // Update Orders
+
         best_bid->remaining_quantity -= trade_quantity;
         best_ask->remaining_quantity -= trade_quantity;
-        
-        // Handle Filled Orders
+
         if (best_bid->remaining_quantity == 0) {
             best_bid->is_active = false;
             bids.pop();
             order_map.erase(best_bid->order_id);
         }
-        
+
         if (best_ask->remaining_quantity == 0) {
             best_ask->is_active = false;
             asks.pop();

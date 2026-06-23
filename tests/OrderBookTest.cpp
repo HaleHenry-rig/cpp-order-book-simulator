@@ -109,3 +109,65 @@ TEST(OrderBookTest, MultipleFills)
     EXPECT_EQ(trades[1].quantity, 10);
     EXPECT_EQ(trades[2].quantity, 10);
 }
+
+TEST(OrderBookTest, MarketBuyConsumesBestAsk)
+{
+    OrderBook book;
+
+    book.add_order(OrderType::SELL, 100.0, 10);
+
+    book.add_order(
+        OrderType::BUY,
+        0.0,
+        10,
+        OrderExecutionType::MARKET
+    );
+
+    EXPECT_EQ(book.trade_count(), 1UL);
+
+    const auto& trades = book.get_trade_history();
+
+    ASSERT_EQ(trades.size(), 1UL);
+
+    EXPECT_EQ(trades[0].quantity, 10);
+    EXPECT_DOUBLE_EQ(trades[0].price, 100.0);
+}
+
+TEST(OrderBookTest, MarketSellConsumesBestBid)
+{
+    OrderBook book;
+
+    book.add_order(OrderType::BUY, 100.0, 10);
+
+    book.add_order(
+        OrderType::SELL,
+        0.0,
+        10,
+        OrderExecutionType::MARKET
+    );
+
+    EXPECT_EQ(book.trade_count(), 1UL);
+
+    const auto& trades = book.get_trade_history();
+
+    ASSERT_EQ(trades.size(), 1UL);
+
+    EXPECT_EQ(trades[0].quantity, 10);
+    EXPECT_DOUBLE_EQ(trades[0].price, 100.0);
+}
+
+TEST(OrderBookTest, MarketOrderWithoutLiquidity)
+{
+    OrderBook book;
+
+    book.add_order(
+        OrderType::BUY,
+        0.0,
+        10,
+        OrderExecutionType::MARKET
+    );
+
+    EXPECT_EQ(book.trade_count(), 0UL);
+
+    EXPECT_TRUE(book.get_trade_history().empty());
+}
