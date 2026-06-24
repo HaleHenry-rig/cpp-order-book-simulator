@@ -14,6 +14,11 @@ static constexpr double PRICE_EPSILON = 1e-9;
 // Internal alias — not part of public API
 using OrderPtr = std::shared_ptr<Order>;
 
+struct BookLevel {
+    double price;
+    int quantity;
+};
+
 struct CompareBids {
     bool operator()(const OrderPtr& a, const OrderPtr& b) const {
         if (std::fabs(a->price - b->price) > PRICE_EPSILON) {
@@ -67,6 +72,11 @@ public:
 
     double get_best_bid() const;
     double get_best_ask() const;
+    double get_spread() const;
+    double get_mid_price() const;
+
+    std::vector<BookLevel> get_bid_depth(int levels) const;
+    std::vector<BookLevel> get_ask_depth(int levels) const;
 };
 
 #endif // ORDERBOOK_H

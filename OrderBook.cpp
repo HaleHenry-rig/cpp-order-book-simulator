@@ -310,3 +310,80 @@ double OrderBook::get_best_ask() const
 
     return 0.0;
 }
+
+double OrderBook::get_spread() const
+{
+    double best_bid = get_best_bid();
+    double best_ask = get_best_ask();
+
+    return best_ask - best_bid;
+}
+
+double OrderBook::get_mid_price() const
+{
+    double best_bid = get_best_bid();
+    double best_ask = get_best_ask();
+
+    return (best_bid + best_ask) / 2.0;
+}
+
+std::vector<BookLevel> OrderBook::get_bid_depth(int levels) const
+{
+    std::vector<BookLevel> depth;
+    auto bids_copy = bids;
+
+    while (!bids_copy.empty() &&
+           depth.size() < static_cast<size_t>(levels))
+    {
+        auto order = bids_copy.top();
+        bids_copy.pop();
+
+        if (!order->is_active)
+        {
+            continue;
+        }
+
+        depth.push_back(
+            {order->price, order->remaining_quantity}
+        );
+    }
+
+    return depth;
+}
+
+std::vector<BookLevel> OrderBook::get_ask_depth(int levels) const
+{
+
+    std::vector<BookLevel> depth;
+
+    auto asks_copy = asks;
+
+    while (!asks_copy.empty() &&
+
+           depth.size() < static_cast<size_t>(levels))
+
+    {
+
+        auto order = asks_copy.top();
+
+        asks_copy.pop();
+
+        if (!order->is_active)
+
+        {
+
+            continue;
+
+        }
+
+        depth.push_back(
+
+            {order->price, order->remaining_quantity}
+
+        );
+
+    }
+
+    return depth;
+
+}
