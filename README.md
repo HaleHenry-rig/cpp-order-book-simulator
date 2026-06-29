@@ -1,4 +1,4 @@
-```markdown
+
 # C++ Real-Time Order Book Simulator
 
 A high-performance limit order book (LOB) implementation simulating real exchange matching engine behavior. Built with modern C++17, featuring price-time priority matching, O(1) order cancellation via lazy deletion, and comprehensive order type support.
