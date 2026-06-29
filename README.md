@@ -41,7 +41,7 @@ A high-performance limit order book (LOB) implementation simulating real exchang
 **Problem**: Removing from the middle of a heap is O(n).  
 **Solution**: Mark orders as inactive, clean during matching.
 
-```text
+```
 1. Order cancelled → is_active = false (O(1) via hash map)
 2. Order stays in heap
 3. During matching, if top order is inactive → pop and discard
@@ -112,7 +112,7 @@ make test
 
 ### Interactive CLI
 
-```text
+```
 ===========================================
 ORDER BOOK SIMULATOR
 ===========================================
@@ -175,7 +175,7 @@ int main() {
 }
 ```
 
-##  Testing
+## 🧪 Testing
 
 Comprehensive test suite using GoogleTest (15+ tests passing):
 
@@ -226,7 +226,7 @@ make benchmark
 
 ## 📁 Project Structure
 
-```text
+```
 cpp-order-book-simulator/
 ├── include/
 │   ├── Order.h           # Order class definition
